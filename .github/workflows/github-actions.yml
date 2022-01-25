@@ -1,0 +1,55 @@
+name: PyTest
+
+on: [push]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+    
+      - name: Set up using the latest Python version
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+
+      - name: Set-up the cache
+        uses: actions/cache@v2
+        id: cache-venv  # name for referring later
+        with:
+          path: ./.venv/  # what we cache: the virtualenv
+          # The cache key depends on requirements.txt
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+
+
+      # Build a virtualenv, but only if it doesn't already exist
+      - name: Installing dependencies from requirements if not in cache
+        run: python -m venv ./.venv && . ./.venv/bin/activate && 
+            pip install -r requirements.txt
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+      
+      
+      # Run tests
+      # Note that you have to activate the virtualenv in every step
+      # because GitHub actions doesn't preserve the environment
+      - name: Test with Pytest
+        run: |
+          . ./.venv/bin/activate && pytest 
+
+      # NON -cached way of running this
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install pytest
+      #     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # - name: Test with pytest
+      #   run: |
+      #     pytest
