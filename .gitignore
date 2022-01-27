@@ -134,3 +134,6 @@ dmypy.json
 
 # data dumps
 .data
+
+# scrap files
+scrap_*.py
