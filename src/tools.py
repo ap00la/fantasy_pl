@@ -8,8 +8,10 @@ def timer(f):
         t_end = time.time()
         if f.__name__ == 'wrapper':
             # do this
-            return result, print(f'Function took {1000*(t_end - t_start):.5f}ms to compute.')
-        return result, print(f'{f.__name__} took {1000*(t_end - t_start):.5f}ms to compute.')
+            print(f'Function took {1000*(t_end - t_start):.5f}ms to compute.')
+            return result
+        print(f'{f.__name__} took {1000*(t_end - t_start):.5f}ms to compute.')
+        return result
     return wrapper
 
 
