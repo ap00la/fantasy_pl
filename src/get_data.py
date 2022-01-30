@@ -37,6 +37,7 @@ async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api
     ''''
     Retrive fixtures, season so far data, and historical data 
     '''
+    [TypeError("Player ID's must be ints") for id in player_ids if not isinstance(id, int)]          
 
     async with httpx.AsyncClient() as client:
         tasks = (client.get(url + str(player_id) + '/') for player_id in player_ids)
