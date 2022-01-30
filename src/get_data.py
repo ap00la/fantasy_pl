@@ -1,28 +1,38 @@
 #%% Imports
 import requests
 import json
-import time
 import asyncio
 import json
 import aiohttp
 from understat import Understat
 import httpx
+from tools import timer
 
 
 #%% Get data function
 
-def get_data(url="https://fantasy.premierleague.com/api/bootstrap-static/"):
+@timer
+def get_data(url="https://fantasy.premierleague.com/api/bootstrap-static/", save_to_file=True):
     """ 
     Retrieve the player data from FPL boostrap static
     """
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception("Response was code " + str(response.status_code))
-    return json.loads(response.text)
+    
+    players = response.json()['elements']
+    players = {player.pop('id'):player for player in players}
+
+    if save_to_file:
+        with open('../.data/player_data.json', 'w') as outf:
+            json.dump(players, outf)
+
+    return players
 
 
 #%% Get player hist
 
+@timer
 async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api/element-summary/', save_to_file=True):
     ''''
     Retrive fixtures, season so far data, and historical data 
@@ -36,7 +46,7 @@ async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api
     data = {int((str(response.url)).split('/')[-2]):response.json() for response in responses}
 
     if save_to_file:
-        with open('.data/history.json', 'w') as outf:
+        with open('../.data/history.json', 'w') as outf:
             json.dump(data, outf)
 
     return data
@@ -44,37 +54,33 @@ async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api
 
 #%% understat data
 
-def get_understat(induvidual_stats=False):
-    '''
-    Understat data getter
-    '''
+@timer
+async def get_understat(induvidual_stats=True, save_to_file=True):
+    async with aiohttp.ClientSession() as session:
+        understat = Understat(session)
+        players = await understat.get_league_players('epl', 2021)
 
-    async def understat_getter(induvidual_stats):
-        async with aiohttp.ClientSession() as session:
-            understat = Understat(session)
-            players = await understat.get_league_players('epl', 2021)
-            
-            if induvidual_stats:
-                for player in players:
-                    with open('../.data/player_data/'+player['player_name']+'.json', 'w') as player_data:
-                        json.dump(player, player_data)
-                
+        if induvidual_stats:
+            for player in players:
+                with open('../.data/player_data/'+player['player_name']+'.json', 'w') as player_data:
+                    json.dump(player, player_data)
+
+        if save_to_file:    
             with open('../.data/raw_understats.json', 'w') as outf:
                 json.dump(players, outf)
 
-    # Running the getters
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(understat_getter(induvidual_stats))
-
-
 
 #%% main()
-
+@timer
 def main():
+    # Returns player data by player ID
     data = get_data()
-    print(type(data))
-    # print(x)
-    get_understat(induvidual_stats=True)
+
+    # Asynchrinous data I/O for understat and player hist
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(get_understat(induvidual_stats = True))
+    loop.run_until_complete(get_player_hist(player_ids = data.keys()))
+
 
 #%% If name main
 if __name__ == '__main__':
