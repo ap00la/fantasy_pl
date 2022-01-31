@@ -24,7 +24,7 @@ def get_data(url="https://fantasy.premierleague.com/api/bootstrap-static/", save
     players = {player.pop('id'):player for player in players}
 
     if save_to_file:
-        with open('../.data/player_data.json', 'w') as outf:
+        with open('.data/player_data.json', 'w') as outf:
             json.dump(players, outf)
 
     return players
@@ -47,7 +47,7 @@ async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api
     data = {int((str(response.url)).split('/')[-2]):response.json() for response in responses}
 
     if save_to_file:
-        with open('../.data/history.json', 'w') as outf:
+        with open('.data/history.json', 'w') as outf:
             json.dump(data, outf)
 
     return data
@@ -63,11 +63,11 @@ async def get_understat(induvidual_stats=True, save_to_file=True):
 
         if induvidual_stats:
             for player in players:
-                with open('../.data/player_data/'+player['player_name']+'.json', 'w') as player_data:
+                with open('.data/player_data/'+player['player_name']+'.json', 'w') as player_data:
                     json.dump(player, player_data)
 
         if save_to_file:    
-            with open('../.data/raw_understats.json', 'w') as outf:
+            with open('.data/raw_understats.json', 'w') as outf:
                 json.dump(players, outf)
 
 
