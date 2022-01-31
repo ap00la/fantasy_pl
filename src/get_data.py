@@ -69,6 +69,8 @@ async def get_understat(induvidual_stats=True, save_to_file=True):
         if save_to_file:    
             with open('.data/raw_understats.json', 'w') as outf:
                 json.dump(players, outf)
+        
+    return players
 
 
 #%% main()
