@@ -5,20 +5,35 @@ import pandas as pd
 from fuzzywuzzy import fuzz
 from tools import timer
 from preferences import columns_to_drop, understat_columns_to_drop, players_to_rename
-
+from get_data import get_data, get_player_hist, get_understat
+import asyncio
 
 #%% Get data function
 
 @timer
 def load_data():
-    with open(".data/player_data.json", "r") as file:
-        player_data = json.load(file)
+    try:
+        with open(".data/player_data.json", "r") as file:
+            player_data = json.load(file)
+    except FileNotFoundError:
+        print("Getting data")
+        player_data = get_data(save_to_file=False)
 
-    with open(".data/history.json", "r") as file:
-        player_history = json.load(file)
+    try:
+        with open(".data/history.json", "r") as file:
+            player_history = json.load(file)
+    except FileNotFoundError:
+        print("Getting player hist")
+        loop = asyncio.get_event_loop()
+        player_history = loop.run_until_complete(get_player_hist(player_ids = player_data.keys()))
 
-    with open(".data/raw_understats.json", "r") as file:
-        understat = json.load(file)
+    try:
+        with open(".data/raw_understats.json", "r") as file:
+            understat = json.load(file)
+    except FileNotFoundError:
+            print("Getting understat")
+            loop = asyncio.get_event_loop()
+            understat = loop.run_until_complete(get_understat(induvidual_stats = True))
 
     return player_data, player_history, understat
 
