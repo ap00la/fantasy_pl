@@ -1,6 +1,7 @@
 #%% Imports
 import requests
 import json
+import logging
 import asyncio
 import json
 import aiohttp
@@ -8,6 +9,8 @@ from understat import Understat
 import httpx
 from tools import timer
 
+logger = logging.basicConfig(format='[%(levelname)s %(module)s] %(asctime)s - %(message)s', level = logging.INFO)
+logger = logging.getLogger(__name__)
 
 #%% Get data function
 
@@ -16,6 +19,7 @@ def get_data(url="https://fantasy.premierleague.com/api/bootstrap-static/", save
     """ 
     Retrieve the player data from FPL boostrap static
     """
+    logger.info(f"Getting raw fpl data from {url}.")
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception("Response was code " + str(response.status_code))
@@ -24,7 +28,8 @@ def get_data(url="https://fantasy.premierleague.com/api/bootstrap-static/", save
     players = {player.pop('id'):player for player in players}
 
     if save_to_file:
-        with open('.data/player_data.json', 'w') as outf:
+        filename = ".data/player_data.json"
+        with open(filename, 'w') as outf:
             json.dump(players, outf)
 
     return players
@@ -38,6 +43,7 @@ async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api
     Retrive fixtures, season so far data, and historical data 
     '''
     [TypeError("Player ID's must be ints") for id in player_ids if not isinstance(id, int)]          
+    logger.info(f"Getting player history data for {len(player_ids)} player from {url}.")
 
     async with httpx.AsyncClient() as client:
         tasks = (client.get(url + str(player_id) + '/') for player_id in player_ids)
@@ -47,7 +53,8 @@ async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api
     data = {int((str(response.url)).split('/')[-2]):response.json() for response in responses}
 
     if save_to_file:
-        with open('.data/history.json', 'w') as outf:
+        filename = ".data/history.json"
+        with open(filename, 'w') as outf:
             json.dump(data, outf)
 
     return data
@@ -57,6 +64,11 @@ async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api
 
 @timer
 async def get_understat(induvidual_stats=True, save_to_file=True):
+    '''
+    
+    '''
+    logger.info("Getting understat data.")
+
     async with aiohttp.ClientSession() as session:
         understat = Understat(session)
         players = await understat.get_league_players('epl', 2021)

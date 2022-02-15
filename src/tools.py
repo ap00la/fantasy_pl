@@ -1,16 +1,22 @@
 import time
 import pandas as pd
+import logging
+
+logger = logging.basicConfig(format='[%(levelname)s %(module)s] %(asctime)s - %(message)s', level = logging.INFO)
+logger = logging.getLogger(__name__)
 
 def timer(f):
     def wrapper(*args, **kwargs):
         t_start = time.time()
         result = f(*args, **kwargs)
         t_end = time.time()
+        
         if f.__name__ == 'wrapper':
             # do this
-            print(f'Function took {1000*(t_end - t_start):.5f}ms to compute.')
-            return result
-        print(f'{f.__name__} took {1000*(t_end - t_start):.5f}ms to compute.')
+            logger.info(f"Function took {1000*(t_end - t_start):.5f}ms to compute.")
+        else:
+            logger.info(f"{f.__name__} took {1000*(t_end - t_start):.5f}ms to compute.")
+        
         return result
     return wrapper
 
