@@ -1,5 +1,6 @@
 #%% Imports
 import requests
+import time
 import json
 import logging
 import asyncio
@@ -50,7 +51,14 @@ async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api
         responses = await asyncio.gather(*tasks)
 
     # dict of dicts with player ID as key
-    data = {int((str(response.url)).split('/')[-2]):response.json() for response in responses}
+    try:
+        data = {int((str(response.url)).split('/')[-2]):response.json() for response in responses}
+    except json.decoder.JSONDecodeError:
+        # Build a slower backup function without ASYNCIO
+        sleep_time = 10 #seconds
+        logger.info(f"JSON decode error raised. Sleeping for {sleep_time} seconds before retrying.")
+        time.sleep(sleep_time)
+        data = {int((str(response.url)).split('/')[-2]):response.json() for response in responses}
 
     if save_to_file:
         filename = ".data/history.json"

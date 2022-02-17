@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def load_data():
     logger.info('Loading data.')
     try:
-        filename = ".data/player_data.jso"
+        filename = ".data/player_data.json"
         with open(filename, "r") as file:
             player_data = json.load(file)
     except FileNotFoundError:
@@ -27,7 +27,7 @@ def load_data():
         player_data = get_data(save_to_file=False)
 
     try:
-        filename = ".data/history.jso"
+        filename = ".data/history.json"
         with open(filename, "r") as file:
             player_history = json.load(file)
     except FileNotFoundError:
@@ -36,7 +36,7 @@ def load_data():
         player_history = loop.run_until_complete(get_player_hist(player_ids = player_data.keys()))
 
     try:
-        filename = ".data/raw_understats.jso"
+        filename = ".data/raw_understats.json"
         with open(filename, "r") as file:
             understat = json.load(file)
     except FileNotFoundError:
