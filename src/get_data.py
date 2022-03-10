@@ -3,6 +3,7 @@ import requests
 import time
 import json
 import logging
+import datetime
 import asyncio
 import json
 import aiohttp
@@ -12,7 +13,7 @@ from tools import timer
 
 logger = logging.basicConfig(format='[%(levelname)s %(module)s] %(asctime)s - %(message)s', level = logging.INFO)
 logger = logging.getLogger(__name__)
-
+today = '_'.join(str(datetime.datetime.today()).split(' ')[0].split('-'))
 #%% Get data function
 
 @timer
@@ -29,7 +30,7 @@ def get_data(url="https://fantasy.premierleague.com/api/bootstrap-static/", save
     players = {player.pop('id'):player for player in players}
 
     if save_to_file:
-        filename = ".data/player_data.json"
+        filename = ".data/" + today + "_player_data.json"
         with open(filename, 'w') as outf:
             json.dump(players, outf)
 
@@ -61,7 +62,7 @@ async def get_player_hist(player_ids, url='https://fantasy.premierleague.com/api
         data = {int((str(response.url)).split('/')[-2]):response.json() for response in responses}
 
     if save_to_file:
-        filename = ".data/history.json"
+        filename = ".data/" + today + "_history.json"
         with open(filename, 'w') as outf:
             json.dump(data, outf)
 
@@ -87,7 +88,7 @@ async def get_understat(induvidual_stats=True, save_to_file=True):
                     json.dump(player, player_data)
 
         if save_to_file:    
-            with open('.data/raw_understats.json', 'w') as outf:
+            with open(".data/" + today + "_raw_understats.json", 'w') as outf:
                 json.dump(players, outf)
         
     return players
