@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 player_categories = ["Goalkeeper", "Defender", "Midfielder", "Forward"]
 position_colors_list = ["red", "blue", "Orange", "Green"]
 position_colors = {cat: color for cat, color in zip(player_categories, position_colors_list)}
-teams = ['Arsenal','Aston Villa','Brentford','Brighton and Hove Albion','Burnley','Chelsea','Crystal Palace','Everton',
+team_names = ['Arsenal','Aston Villa','Brentford','Brighton and Hove Albion','Burnley','Chelsea','Crystal Palace','Everton',
         'Leeds','Leicester City','Liverpool','Manchester City','Manchester United','Newcastle United','Norwich City',
         'Southampton','Tottenham Hotspur','Watford','West Ham','Wolverhampton Wanderers']
-
+teams = np.arange(1,21)
 
 #%% Ingest and or Process
 today = '_'.join(str(datetime.datetime.today()).split(' ')[0].split('-'))
@@ -67,7 +67,9 @@ app.layout= html.Div(children=[
                   hole=.3,
                   color_discrete_map=position_colors,
                   title = "Number of Players in each Position"
-                  )),
+                  ),
+                  style={'display': 'inline-block'}
+                  ),
             
             # Pie chart showing total points per category of player divided by number of players per miinute played
             dcc.Graph(id='Point won by each catogery',
@@ -78,7 +80,9 @@ app.layout= html.Div(children=[
                   hole=.3,
                   color_discrete_map=position_colors,
                   title = "Average Number of Total Points per player in each Position"
-                  ))
+                  ),
+                  style={'display': 'inline-block'},
+                  )
             ]
     ),
 
@@ -90,105 +94,110 @@ app.layout= html.Div(children=[
             html.H2("Overall Player Breakdown", className="container_title"),
 
 
+            html.Div(
+                children=[
+                    
+                    dcc.Dropdown(id='x_axis',
+                        options=[
+                            {'label': 'Dreamteam Count', 'value': 'dreamteam_count'},
+                            {'label': 'Form', 'value': 'form'},
+                            {'label': 'Now Cost', 'value': 'now_cost'},
+                            {'label': 'Points Per Game', 'value': 'points_per_game'},
+                            {'label': 'Selected By Percent', 'value': 'selected_by_percent'},
+                            {'label': 'Total Points', 'value': 'total_points'},
+                            {'label': 'Transfers In', 'value': 'transfers_in'},
+                            {'label': 'Transfers Out', 'value': 'transfers_out'},
+                            {'label': 'Value Form', 'value': 'value_form'},
+                            {'label': 'Value Season', 'value': 'value_season'},
+                            {'label': 'Minutes', 'value': 'minutes'},
+                            {'label': 'Goals Scored', 'value': 'goals_scored'},
+                            {'label': 'Assists', 'value': 'assists'},
+                            {'label': 'Clean Sheets', 'value': 'clean_sheets'},
+                            {'label': 'Goals Conceded', 'value': 'goals_conceded'},
+                            {'label': 'Own Goals', 'value': 'own_goals'},
+                            {'label': 'Penalties Saved', 'value': 'penalties_saved'},
+                            {'label': 'Penalties Missed', 'value': 'penalties_missed'},
+                            {'label': 'Yellow Cards', 'value': 'yellow_cards'},
+                            {'label': 'Red Cards', 'value': 'red_cards'},
+                            {'label': 'Saves', 'value': 'saves'},
+                            {'label': 'Bonus', 'value': 'bonus'},
+                            {'label': 'Bps', 'value': 'bps'},
+                            {'label': 'Influence', 'value': 'influence'},
+                            {'label': 'Creativity', 'value': 'creativity'},
+                            {'label': 'Threat', 'value': 'threat'},
+                            {'label': 'Ict Index', 'value': 'ict_index'},
+                            {'label': 'Games', 'value': 'games'},
+                            {'label': 'xG', 'value': 'xG'},
+                            {'label': 'xA', 'value': 'xA'},
+                            {'label': 'Shots', 'value': 'shots'},
+                            {'label': 'Key_passes', 'value': 'key_passes'},
+                            {'label': 'npg', 'value': 'npg'},
+                            {'label': 'npxG', 'value': 'npxG'},
+                            {'label': 'xGChain', 'value': 'xGChain'},
+                            {'label': 'xGBuildup', 'value': 'xGBuildup'}],
+                            multi=False,
+                            value='now_cost',
+                            style={'display': 'inline-block', "width":"50%"}
+                            ),
 
-            dcc.Dropdown(id='x_axis',
-                 options=[
-                      {'label': 'Dreamteam Count', 'value': 'dreamteam_count'},
-                      {'label': 'Form', 'value': 'form'},
-                      {'label': 'Now Cost', 'value': 'now_cost'},
-                      {'label': 'Points Per Game', 'value': 'points_per_game'},
-                      {'label': 'Selected By Percent', 'value': 'selected_by_percent'},
-                      {'label': 'Total Points', 'value': 'total_points'},
-                      {'label': 'Transfers In', 'value': 'transfers_in'},
-                      {'label': 'Transfers Out', 'value': 'transfers_out'},
-                      {'label': 'Value Form', 'value': 'value_form'},
-                      {'label': 'Value Season', 'value': 'value_season'},
-                      {'label': 'Minutes', 'value': 'minutes'},
-                      {'label': 'Goals Scored', 'value': 'goals_scored'},
-                      {'label': 'Assists', 'value': 'assists'},
-                      {'label': 'Clean Sheets', 'value': 'clean_sheets'},
-                      {'label': 'Goals Conceded', 'value': 'goals_conceded'},
-                      {'label': 'Own Goals', 'value': 'own_goals'},
-                      {'label': 'Penalties Saved', 'value': 'penalties_saved'},
-                      {'label': 'Penalties Missed', 'value': 'penalties_missed'},
-                      {'label': 'Yellow Cards', 'value': 'yellow_cards'},
-                      {'label': 'Red Cards', 'value': 'red_cards'},
-                      {'label': 'Saves', 'value': 'saves'},
-                      {'label': 'Bonus', 'value': 'bonus'},
-                      {'label': 'Bps', 'value': 'bps'},
-                      {'label': 'Influence', 'value': 'influence'},
-                      {'label': 'Creativity', 'value': 'creativity'},
-                      {'label': 'Threat', 'value': 'threat'},
-                      {'label': 'Ict Index', 'value': 'ict_index'},
-                      {'label': 'Games', 'value': 'games'},
-                      {'label': 'xG', 'value': 'xG'},
-                      {'label': 'xA', 'value': 'xA'},
-                      {'label': 'Shots', 'value': 'shots'},
-                      {'label': 'Key_passes', 'value': 'key_passes'},
-                      {'label': 'npg', 'value': 'npg'},
-                      {'label': 'npxG', 'value': 'npxG'},
-                      {'label': 'xGChain', 'value': 'xGChain'},
-                      {'label': 'xGBuildup', 'value': 'xGBuildup'}],
-                      multi=False,
-                      value='now_cost',
-                      style={"width":"50%"}
-                      ),
-
-            dcc.Dropdown(id='y_axis',
-                 options=[
-                      {'label': 'Dreamteam Count', 'value': 'dreamteam_count'},
-                      {'label': 'Form', 'value': 'form'},
-                      {'label': 'Now Cost', 'value': 'now_cost'},
-                      {'label': 'Points Per Game', 'value': 'points_per_game'},
-                      {'label': 'Selected By Percent', 'value': 'selected_by_percent'},
-                      {'label': 'Total Points', 'value': 'total_points'},
-                      {'label': 'Transfers In', 'value': 'transfers_in'},
-                      {'label': 'Transfers Out', 'value': 'transfers_out'},
-                      {'label': 'Value Form', 'value': 'value_form'},
-                      {'label': 'Value Season', 'value': 'value_season'},
-                      {'label': 'Minutes', 'value': 'minutes'},
-                      {'label': 'Goals Scored', 'value': 'goals_scored'},
-                      {'label': 'Assists', 'value': 'assists'},
-                      {'label': 'Clean Sheets', 'value': 'clean_sheets'},
-                      {'label': 'Goals Conceded', 'value': 'goals_conceded'},
-                      {'label': 'Own Goals', 'value': 'own_goals'},
-                      {'label': 'Penalties Saved', 'value': 'penalties_saved'},
-                      {'label': 'Penalties Missed', 'value': 'penalties_missed'},
-                      {'label': 'Yellow Cards', 'value': 'yellow_cards'},
-                      {'label': 'Red Cards', 'value': 'red_cards'},
-                      {'label': 'Saves', 'value': 'saves'},
-                      {'label': 'Bonus', 'value': 'bonus'},
-                      {'label': 'Bps', 'value': 'bps'},
-                      {'label': 'Influence', 'value': 'influence'},
-                      {'label': 'Creativity', 'value': 'creativity'},
-                      {'label': 'Threat', 'value': 'threat'},
-                      {'label': 'Ict Index', 'value': 'ict_index'},
-                      {'label': 'Games', 'value': 'games'},
-                      {'label': 'xG', 'value': 'xG'},
-                      {'label': 'xA', 'value': 'xA'},
-                      {'label': 'Shots', 'value': 'shots'},
-                      {'label': 'Key_passes', 'value': 'key_passes'},
-                      {'label': 'npg', 'value': 'npg'},
-                      {'label': 'npxG', 'value': 'npxG'},
-                      {'label': 'xGChain', 'value': 'xGChain'},
-                      {'label': 'xGBuildup', 'value': 'xGBuildup'}],
-                      multi=False,
-                      value='total_points',
-                      style={"width":"50%"}
-                      ),
+                    dcc.Dropdown(id='y_axis',
+                        options=[
+                            {'label': 'Dreamteam Count', 'value': 'dreamteam_count'},
+                            {'label': 'Form', 'value': 'form'},
+                            {'label': 'Now Cost', 'value': 'now_cost'},
+                            {'label': 'Points Per Game', 'value': 'points_per_game'},
+                            {'label': 'Selected By Percent', 'value': 'selected_by_percent'},
+                            {'label': 'Total Points', 'value': 'total_points'},
+                            {'label': 'Transfers In', 'value': 'transfers_in'},
+                            {'label': 'Transfers Out', 'value': 'transfers_out'},
+                            {'label': 'Value Form', 'value': 'value_form'},
+                            {'label': 'Value Season', 'value': 'value_season'},
+                            {'label': 'Minutes', 'value': 'minutes'},
+                            {'label': 'Goals Scored', 'value': 'goals_scored'},
+                            {'label': 'Assists', 'value': 'assists'},
+                            {'label': 'Clean Sheets', 'value': 'clean_sheets'},
+                            {'label': 'Goals Conceded', 'value': 'goals_conceded'},
+                            {'label': 'Own Goals', 'value': 'own_goals'},
+                            {'label': 'Penalties Saved', 'value': 'penalties_saved'},
+                            {'label': 'Penalties Missed', 'value': 'penalties_missed'},
+                            {'label': 'Yellow Cards', 'value': 'yellow_cards'},
+                            {'label': 'Red Cards', 'value': 'red_cards'},
+                            {'label': 'Saves', 'value': 'saves'},
+                            {'label': 'Bonus', 'value': 'bonus'},
+                            {'label': 'Bps', 'value': 'bps'},
+                            {'label': 'Influence', 'value': 'influence'},
+                            {'label': 'Creativity', 'value': 'creativity'},
+                            {'label': 'Threat', 'value': 'threat'},
+                            {'label': 'Ict Index', 'value': 'ict_index'},
+                            {'label': 'Games', 'value': 'games'},
+                            {'label': 'xG', 'value': 'xG'},
+                            {'label': 'xA', 'value': 'xA'},
+                            {'label': 'Shots', 'value': 'shots'},
+                            {'label': 'Key_passes', 'value': 'key_passes'},
+                            {'label': 'npg', 'value': 'npg'},
+                            {'label': 'npxG', 'value': 'npxG'},
+                            {'label': 'xGChain', 'value': 'xGChain'},
+                            {'label': 'xGBuildup', 'value': 'xGBuildup'}],
+                            multi=False,
+                            value='total_points',
+                            style={'display': 'inline-block', "width":"50%"}
+                            ),
 
 
 
-            dcc.Dropdown(id='filter_by',
-                 options=[
-                      {'label': 'Goalkeeper', 'value': 'Goalkeeper'},
-                      {'label': 'Defender', 'value': 'Defender'},
-                      {'label': 'Midfielder', 'value': 'Midfielder'},
-                      {'label': 'Forward', 'value': 'Forward'}],
-                      multi=True,
-                      value=player_categories,
-                      style={"width":"50%"}
-                      ),
+                    dcc.Dropdown(id='filter_by',
+                        options=[
+                            {'label': 'Goalkeeper', 'value': 'Goalkeeper'},
+                            {'label': 'Defender', 'value': 'Defender'},
+                            {'label': 'Midfielder', 'value': 'Midfielder'},
+                            {'label': 'Forward', 'value': 'Forward'}],
+                            multi=True,
+                            value=player_categories,
+                            style={'display': 'inline-block', "width":"50%"}
+                            ),
+
+                ]
+            ),
 
             dcc.Dropdown(id='team',
                  options=[
@@ -215,12 +224,14 @@ app.layout= html.Div(children=[
                       ],
                       multi=True,
                       value=teams,
-                      style={"width":"50%"}
+                      style={"width":"100%"}
                       ),
 
             # Graph showing POINTS vs Cost
             # Line of best fit through the data
-            dcc.Graph(id='scatter_plot', figure={}),
+            dcc.Graph(id='scatter_plot',
+                      figure={},
+                      style={'width': '100%', 'height': '100vh'}),
             
             ]
          ),
