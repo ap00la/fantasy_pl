@@ -249,6 +249,42 @@ def process_gw_data(df, hist_data):
     return detailed_df
 
 
+#%% Create slices for machine learning
+# this function is not called in main but is called in the ML notebook
+
+def create_ml_df(gw_df, weeks=3):
+    '''
+    This function uses the gameweek dataframe to create data points for the machine learning notebook.
+    The data is slices up into chunks and then flattened out into a singular data point before being compiled back into a df for ML.
+
+    '''
+    gw = max(gw_df.index)
+    slices = [np.arange(i-(weeks-1),i+1) for i in range(weeks, gw)]
+    logger.info(f"{len(slices)} slices for each player will be made up to gameweek {gw}")
+    logger.info(f"There are {len(gw_df['id'].unique())} players in the dataframe")
+    logger.info(f"There will be {len(gw_df['id'].unique())*len(slices)} datapoints in returned dataframe.")
+
+    df = pd.DataFrame()
+    logger.info("Slicing data")
+    for id in gw_df['id'].unique(): # [7, 413]:
+        player_df = gw_df[gw_df['id'] == id]
+
+        for slice in slices:
+            df_slice = player_df.loc[slice,:].iloc[::-1].reset_index(drop=True)
+            
+            unstacked = df_slice.drop(columns=['element_type', 'player_name', 'team', 'id']).unstack().to_frame().T
+            unstacked.columns = unstacked.columns.map(lambda x: x[0] + '_' + str(1+x[1])+'_weeks_ago')
+
+            unstacked['target'] = player_df.loc[max(slice)+1,:]['total_points']
+            unstacked['player_name'] = player_df.loc[1,'player_name']
+            unstacked['id'] = player_df.loc[1,'id']
+            unstacked['team'] = player_df.loc[1,'team']
+            unstacked['element_type'] = player_df.loc[1,'element_type']
+            df = pd.concat([df, unstacked], axis=0)
+            
+    return df.reset_index(drop=True)
+
+
 #%% main()
 @timer
 def main(save_to_file=True, min_minutes=90, remove_injured=False):
